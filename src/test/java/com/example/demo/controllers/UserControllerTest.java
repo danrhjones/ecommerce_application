@@ -52,6 +52,19 @@ public class UserControllerTest {
     }
 
     @Test
+    public void test_create_user_with_password_to_short() {
+        when(encoder.encode("password")).thenReturn("thisIsHashed");
+        CreateUserRequest createUserRequest = new CreateUserRequest();
+        createUserRequest.setUsername("test");
+        createUserRequest.setPassword("pass");
+        createUserRequest.setConfirmPassword("pass");
+
+        final ResponseEntity<User> createUserResponse = userController.createUser(createUserRequest);
+        assertNotNull(createUserResponse);
+        assertEquals(400, createUserResponse.getStatusCodeValue());
+    }
+
+    @Test
     public void test_finding_user_by_username() {
         createUser("test", "password");
         when(userRepository.findByUsername("test")).thenReturn(setUser());
