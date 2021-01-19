@@ -9,7 +9,7 @@ public class TestUtils {
 
         try {
             Field field = target.getClass().getDeclaredField(fieldName);
-            if (!field.isAccessible()) {
+            if (!field.canAccess(target)) {
                 field.setAccessible(true);
                 wasPrivate = true;
             }
