@@ -34,7 +34,7 @@ public class UserControllerTest {
     }
 
     @Test
-    public void create_user() {
+    public void test_create_user() {
         when(encoder.encode("password")).thenReturn("thisIsHashed");
         CreateUserRequest createUserRequest = new CreateUserRequest();
         createUserRequest.setUsername("test");
@@ -42,17 +42,49 @@ public class UserControllerTest {
         createUserRequest.setConfirmPassword("password");
 
         final ResponseEntity<User> createUserResponse = userController.createUser(createUserRequest);
-
         assertNotNull(createUserResponse);
         assertEquals(200, createUserResponse.getStatusCodeValue());
 
         User user = createUserResponse.getBody();
-
         assertNotNull(user);
         assertEquals(0, user.getId());
         assertEquals("thisIsHashed", user.getPassword());
-
-
     }
 
+    @Test
+    public void test_finding_user_by_username() {
+        createUser("test", "password");
+        when(userRepository.findByUsername("test")).thenReturn(setUser());
+        final ResponseEntity<User> response = userController.findByUserName("test");
+        assertEquals(200, response.getStatusCodeValue());
+        User user = response.getBody();
+        assertEquals("test", user.getUsername());
+    }
+
+    @Test
+    public void test_finding_user_by_id() {
+        createUser("test", "password");
+        when(userRepository.findById(0L)).thenReturn(java.util.Optional.of(setUser()));
+        final ResponseEntity<User> response = userController.findById(0L);
+        assertNotNull(response);
+        assertEquals(200, response.getStatusCodeValue());
+        User user = response.getBody();
+        assertEquals(0, user.getId());
+    }
+
+    private ResponseEntity<User> createUser(String username, String password) {
+        CreateUserRequest createUserRequest = new CreateUserRequest();
+        createUserRequest.setUsername(username);
+        createUserRequest.setPassword(password);
+        createUserRequest.setConfirmPassword(password);
+        return userController.createUser(createUserRequest);
+    }
+
+    private User setUser() {
+        User user = new User();
+        user.setId(0);
+        user.setUsername("test");
+        user.setPassword("testPassword");
+        return user;
+    }
 }
