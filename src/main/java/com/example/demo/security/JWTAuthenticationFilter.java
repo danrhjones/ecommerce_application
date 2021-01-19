@@ -19,23 +19,23 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilter {
 
-    private AuthenticationManager authenticationManager;
+    private final AuthenticationManager authenticationManager;
 
     public JWTAuthenticationFilter(AuthenticationManager authenticationManager) {
         this.authenticationManager = authenticationManager;
     }
 
     @Override
-    public Authentication attemptAuthentication(HttpServletRequest req,
-        HttpServletResponse res) throws AuthenticationException {
+    public Authentication attemptAuthentication(HttpServletRequest httpServletRequest,
+        HttpServletResponse httpServletResponse) throws AuthenticationException {
         try {
-            User credentials = new ObjectMapper()
-                .readValue(req.getInputStream(), User.class);
+            User user = new ObjectMapper()
+                .readValue(httpServletRequest.getInputStream(), User.class);
 
             return authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
-                    credentials.getUsername(),
-                    credentials.getPassword(),
+                    user.getUsername(),
+                    user.getPassword(),
                     new ArrayList<>()));
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -43,15 +43,18 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
     }
 
     @Override
-    protected void successfulAuthentication(HttpServletRequest req,
-        HttpServletResponse res,
-        FilterChain chain,
-        Authentication auth)  {
+    protected void successfulAuthentication(HttpServletRequest httpServletRequest,
+        HttpServletResponse httpServletResponse,
+        FilterChain filterChain,
+        Authentication authentication) {
 
         String token = JWT.create()
-            .withSubject(((org.springframework.security.core.userdetails.User) auth.getPrincipal()).getUsername())
+            .withSubject(
+                ((org.springframework.security.core.userdetails.User) authentication.getPrincipal())
+                    .getUsername())
             .withExpiresAt(new Date(System.currentTimeMillis() + SecurityConstants.EXPIRATION_TIME))
             .sign(HMAC512(SecurityConstants.SECRET.getBytes()));
-        res.addHeader(SecurityConstants.HEADER_STRING, SecurityConstants.TOKEN_PREFIX + token);
+        httpServletResponse
+            .addHeader(SecurityConstants.HEADER_STRING, SecurityConstants.TOKEN_PREFIX + token);
     }
 }
