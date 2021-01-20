@@ -51,13 +51,13 @@ public class UserController {
         user.setCart(cart);
         if (createUserRequest.getPassword().length() < MINIMUM_PASSWORD_LENGTH ||
             !createUserRequest.getPassword().equals(createUserRequest.getConfirmPassword())) {
-            log.error("Failed to create user " + createUserRequest.getUsername());
+            log.error("CREATE_USER_FAILURE: \"password does not meet required length\"");
             return ResponseEntity.badRequest().build();
         }
         user.setPassword(bCryptPasswordEncoder.encode(createUserRequest.getPassword()));
         userRepository.save(user);
-        log.info("Created user " + createUserRequest.getUsername());
+        log.info("CREATE_USER_REQUEST: \"user {} created successfully\"", createUserRequest.getUsername());
         return ResponseEntity.ok(user);
     }
-
+//source="ecommerce_app.log" host="dans-mbp.lan" sourcetype="ecommerce" create_user_request: host="*"| timechart count by host limit=10
 }
