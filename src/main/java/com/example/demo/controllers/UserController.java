@@ -59,5 +59,4 @@ public class UserController {
         log.info("CREATE_USER_REQUEST: \"user {} created successfully\"", createUserRequest.getUsername());
         return ResponseEntity.ok(user);
     }
-//source="ecommerce_app.log" host="dans-mbp.lan" sourcetype="ecommerce" create_user_request: host="*"| timechart count by host limit=10
 }
